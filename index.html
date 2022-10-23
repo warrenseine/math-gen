@@ -74,10 +74,6 @@
         <label for="maximum">Maximum</label>
       </div>
       <div>
-        <input type="number" id="columns" value="3" />
-        <label for="columns">Columns</label>
-      </div>
-      <div>
         <input type="number" id="rows" value="20" />
         <label for="rows">Rows</label>
       </div>
@@ -88,57 +84,55 @@
     <div class="wrapper"></div>
 
     <script>
-      const rows = 20;
-      const cols = 3;
-
       function htmlToElement(html) {
         var template = document.createElement("template");
         template.innerHTML = html.trim();
         return template.content.firstChild;
       }
 
-      function randomAddition() {
-        const n = Math.floor(Math.random() * 100);
+      function randomAddition(maximum) {
+        const n = Math.floor(Math.random() * maximum);
         const x = Math.floor(Math.random() * n);
         const y = n - x;
         return { n, x, y };
       }
 
-      function randomMultiplication() {
-        const x = Math.floor(Math.random() * 10);
-        const y = Math.floor(Math.random() * 10);
+      function randomMultiplication(maximum) {
+        const operandMaximum = Math.floor(Math.sqrt(maximum));
+        const x = Math.floor(Math.random() * operandMaximum);
+        const y = Math.floor(Math.random() * operandMaximum);
         const n = x * y;
         return { n, x, y };
       }
 
-      function verticalIndex(i) {
+      function verticalIndex(i, cols, rows) {
         return Math.floor(i / cols) + (i % cols) * rows + 1;
       }
 
-      function createAdditionNode(i) {
-        const { n, x, y } = randomAddition();
+      function createAdditionNode(i, maximum) {
+        const { n, x, y } = randomAddition(maximum);
         const html = `<div class="equation">
-          <div class="index">${verticalIndex(i)}</div>
+          <div class="index">${i}</div>
           <div class="number">${x}</div> + <div class="number">${y}</div> = <div class="number solution hidden">${n}</div>
         </div>`;
 
         return htmlToElement(html);
       }
 
-      function createSubtractionNode(i) {
-        const { n, x, y } = randomAddition();
+      function createSubtractionNode(i, maximum) {
+        const { n, x, y } = randomAddition(maximum);
         const html = `<div class="equation">
-          <div class="index">${verticalIndex(i)}</div>
+          <div class="index">${i}</div>
           <div class="number">${n}</div> − <div class="number">${x}</div> = <div class="number solution hidden">${y}</div>
         </div>`;
 
         return htmlToElement(html);
       }
 
-      function createMultiplicationNode(i) {
-        const { n, x, y } = randomMultiplication();
+      function createMultiplicationNode(i, maximum) {
+        const { n, x, y } = randomMultiplication(maximum);
         const html = `<div class="equation">
-          <div class="index">${verticalIndex(i)}</div>
+          <div class="index">${i}</div>
           <div class="number">${x}</div> × <div class="number">${y}</div> = <div class="number solution hidden">${n}</div>
         </div>`;
 
@@ -171,10 +165,17 @@
 
         if (operations.length === 0) return;
 
+        const rows = Number.parseInt(document.querySelector("#rows").value);
+        const cols = 3;
+        const maximum = Number.parseInt(
+          document.querySelector("#maximum").value
+        );
+
         for (let i = 0; i < cols * rows; ++i) {
+          const n = verticalIndex(i, cols, rows);
           const operation =
             operations[Math.floor(Math.random() * operations.length)];
-          const equation = operation(i);
+          const equation = operation(n, maximum);
 
           wrapper.appendChild(equation);
         }
