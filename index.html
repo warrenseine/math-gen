@@ -1,0 +1,186 @@
+<html>
+  <body>
+    <style>
+      .wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .equation {
+        font-family: "Noteworthy", sans-serif;
+        font-size: 20px;
+        height: 40px;
+      }
+
+      .number {
+        display: inline-block;
+        text-align: center;
+        width: 38px;
+      }
+
+      .solution {
+        color: rgb(185, 49, 49);
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      .index {
+        display: inline-block;
+        text-align: center;
+        width: 17px;
+        border-radius: 50%;
+        border: 1px solid rgb(25, 157, 219);
+        color: rgb(25, 157, 219);
+        font-family: "Gill Sans", sans-serif;
+        font-size: 14px;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+
+      fieldset {
+        font-family: "Gill Sans", sans-serif;
+      }
+
+      input,
+      button {
+        margin-top: 10px;
+      }
+
+      @media print {
+        .controls {
+          display: none;
+        }
+      }
+    </style>
+
+    <fieldset class="controls">
+      <legend>Operations</legend>
+      <div>
+        <input type="checkbox" checked id="addition" />
+        <label for="addition">Addition</label>
+      </div>
+      <div>
+        <input type="checkbox" id="subtraction" />
+        <label for="subtraction">Subtraction</label>
+      </div>
+      <div>
+        <input type="checkbox" id="multiplication" />
+        <label for="multiplication">Multiplication</label>
+      </div>
+      <div>
+        <input type="number" id="maximum" value="100" />
+        <label for="maximum">Maximum</label>
+      </div>
+      <div>
+        <input type="number" id="columns" value="3" />
+        <label for="columns">Columns</label>
+      </div>
+      <div>
+        <input type="number" id="rows" value="20" />
+        <label for="rows">Rows</label>
+      </div>
+      <button onclick="run()">Create</button>
+      <button onclick="toggleAnswers()">Toggle answers</button>
+    </fieldset>
+
+    <div class="wrapper"></div>
+
+    <script>
+      const rows = 20;
+      const cols = 3;
+
+      function htmlToElement(html) {
+        var template = document.createElement("template");
+        template.innerHTML = html.trim();
+        return template.content.firstChild;
+      }
+
+      function randomAddition() {
+        const n = Math.floor(Math.random() * 100);
+        const x = Math.floor(Math.random() * n);
+        const y = n - x;
+        return { n, x, y };
+      }
+
+      function randomMultiplication() {
+        const x = Math.floor(Math.random() * 10);
+        const y = Math.floor(Math.random() * 10);
+        const n = x * y;
+        return { n, x, y };
+      }
+
+      function verticalIndex(i) {
+        return Math.floor(i / cols) + (i % cols) * rows + 1;
+      }
+
+      function createAdditionNode(i) {
+        const { n, x, y } = randomAddition();
+        const html = `<div class="equation">
+          <div class="index">${verticalIndex(i)}</div>
+          <div class="number">${x}</div> + <div class="number">${y}</div> = <div class="number solution hidden">${n}</div>
+        </div>`;
+
+        return htmlToElement(html);
+      }
+
+      function createSubtractionNode(i) {
+        const { n, x, y } = randomAddition();
+        const html = `<div class="equation">
+          <div class="index">${verticalIndex(i)}</div>
+          <div class="number">${n}</div> − <div class="number">${x}</div> = <div class="number solution hidden">${y}</div>
+        </div>`;
+
+        return htmlToElement(html);
+      }
+
+      function createMultiplicationNode(i) {
+        const { n, x, y } = randomMultiplication();
+        const html = `<div class="equation">
+          <div class="index">${verticalIndex(i)}</div>
+          <div class="number">${x}</div> × <div class="number">${y}</div> = <div class="number solution hidden">${n}</div>
+        </div>`;
+
+        return htmlToElement(html);
+      }
+
+      function toggleAnswers() {
+        document
+          .querySelectorAll(".solution")
+          .forEach((e) => e.classList.toggle("hidden"));
+      }
+
+      function run() {
+        const mathMap = {
+          addition: createAdditionNode,
+          subtraction: createSubtractionNode,
+          multiplication: createMultiplicationNode,
+        };
+
+        const wrapper = document.querySelector(".wrapper");
+        wrapper.replaceChildren();
+
+        const operations = [];
+
+        for (let key in mathMap) {
+          if (document.querySelector(`#${key}`).checked) {
+            operations.push(mathMap[key]);
+          }
+        }
+
+        if (operations.length === 0) return;
+
+        for (let i = 0; i < cols * rows; ++i) {
+          const operation =
+            operations[Math.floor(Math.random() * operations.length)];
+          const equation = operation(i);
+
+          wrapper.appendChild(equation);
+        }
+      }
+
+      run();
+    </script>
+  </body>
+</html>
